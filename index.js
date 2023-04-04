@@ -4,7 +4,7 @@ require("dotenv").config();
 
 // Define custom error scenarios for the API.
 // Return true for the adapter to retry.
-const customError = data => {
+const customError = (data) => {
   if (data.Response === "Error") return true;
   return false;
 };
@@ -14,9 +14,7 @@ const customError = data => {
 // with a Boolean value indicating whether or not they
 // should be required.
 const customParams = {
-  number: ["number", "integer"], // 'integer' is an alias. The URL parameter can use integer or number, and it will be mapped to 'number'.
-  infoType: ["infoType"],
-  endpoint: false,
+  query: ["query"],
 };
 
 /**
@@ -25,51 +23,51 @@ const customParams = {
  * @param {(status:number, result:any)=>{}} callback
  */
 const createRequest = (input, callback) => {
-  // The Validator helps you validate the Chainlink request data);
+  // The Validator helps you validate the Chainlink request data
   const validator = new Validator(input, customParams);
-
   const jobRunID = validator.validated.id;
-  const endpoint = validator.validated.data.endpoint || ""; // Note: - no endpoint param in this example. Endpoint means  REST resource.
-  const number = validator.validated.data.number;
-  const infoType = validator.validated.data.infoType;
 
-  const url = `http://numbersapi.com/${number}/${infoType}`;
+  /// UNCOMMENT BELOW TO USE TWITTER API ///
+  // const url = "https://api.twitter.com/2/tweets/counts/recent";
+  // const queryParams = {
+  //   query: validator.validated.data.query,
+  //   since: new Date().getTime() - 24 * 60 * 60 * 1000,
+  // };
+  // const headers = { Authorization: `Bearer ${process.env.TWITTER_BEARER_KEY}` };
+  // const config = {
+  //   url,
+  //   params: queryParams, // Note: empty object
+  //   headers, // Note: Headers with authorization data etc can be added. This config object is passed to Axios by 'Requester'.
+  // };
 
-  const queryParams = {
-    // NOTE: query params are the params inserted in a URL after the ? character.
-    // None in this example.
+  // // The Requester allows API calls be retry in case of timeout or connection failure
+  // Requester.request(config, customError)
+  //   .then((response) => {
+  //     // It's common practice to store the desired value at the top-level
+  //     // result key. This allows different adapters to be compatible with
+  //     // one another.
+  //     response.data = {
+  //       result: response.data,
+  //       date: response.headers.date,
+  //     };
+
+  // callback(response.status, Requester.success(jobRunID, response));
+  //   })
+  //   .catch((error) => {
+  //     callback(500, Requester.errored(jobRunID, error));
+  //   });
+
+  /// TEMPORARY FIX FOR TWITTER API ///
+  // Generate random integer between 0 and 100
+  const randomInt = Math.floor(Math.random() * 100);
+  const result = { result: randomInt };
+  const mockResponse = {
+    jobRunID,
+    data: { result: randomInt },
+    result: randomInt,
+    statusCode: 200,
   };
-
-  // This is where you would add method and headers
-  // you can add method like GET or POST and add it to the config
-  // The default is GET requests
-  // method = 'get'
-  // headers = 'headers.....'
-  const headers = { Authorization: `My-Authn-Here ${process.env.API_KEY}` }; // NOTE: not needed in this example.
-
-  const config = {
-    url,
-    params: queryParams, // Note: empty object
-    headers, // Note: Headers with authorization data etc can be added. This config object is passed to Axios by 'Requester'.
-  };
-
-  // The Requester allows API calls be retry in case of timeout
-  // or connection failure
-  Requester.request(config, customError)
-    .then(response => {
-      // It's common practice to store the desired value at the top-level
-      // result key. This allows different adapters to be compatible with
-      // one another.
-      response.data = {
-        result: response.data,
-        date: response.headers.date,
-      };
-
-      callback(response.status, Requester.success(jobRunID, response));
-    })
-    .catch(error => {
-      callback(500, Requester.errored(jobRunID, error));
-    });
+  callback(200, mockResponse);
 };
 
 // This is a wrapper to allow the function to work with
