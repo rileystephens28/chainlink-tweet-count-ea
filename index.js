@@ -58,9 +58,7 @@ const createRequest = (input, callback) => {
   //   });
 
   /// TEMPORARY FIX FOR TWITTER API ///
-  // Generate random integer between 0 and 100
   const randomInt = Math.floor(Math.random() * 100);
-  const result = { result: randomInt };
   const mockResponse = {
     jobRunID,
     data: { result: randomInt },
